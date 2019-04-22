@@ -1,9 +1,3 @@
-"""
-reference : https://github.com/kernc/backtesting.py
-            https://github.com/Yvictor/TradingGym
-            
-"""
-
 import pandas as pd
 import numpy as np
 
@@ -64,6 +58,41 @@ class _StockDataFrame():
         if arr is None:
             arr = self.__cache[key] = self.__arrays[key][:self.__i]
         return arr
+
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self, state):
+        self.__dict__ = state
+
+class StocksData():
+    def __init__(self, df, id, using_features):
+        print(df.columns)
+        df = df[using_features]
+        self.__id = id
+        self.__features = df.columns
+        self.__symbols = np.sort(np.unique(df[id]))
+        self.__data = {}
+
+        import time
+        start_time = time.time()
+        print("Indexing {0}'s symbols and {1} features".format(len(self.__symbols), len(self.__features)))
+        for symbol in self.__symbols:
+            self.__data[symbol] = _StockDataFrame(df[df[id] == symbol])
+        print("============== {} seconds ==============".format(time.time() - start_time))
+        print("Finished hashing stocks")
+
+    def getitem(self, item):
+        return getattr(self, item)
+
+    def __getitem__(self, item):
+        return getattr(self, item)
+
+    def __getattr__(self, item):
+        try:
+            return self.__data[item]
+        except KeyError:
+            raise KeyError("Symbol '{}' not in data".format(item)) from None
 
     def __getstate__(self):
         return self.__dict__

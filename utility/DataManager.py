@@ -4,7 +4,7 @@ import numpy as np
 import inspect
 import pickle, os
 
-from _util import _StockDataFrame
+from _util import StocksData
 """
 design pattern   https://hamait.tistory.com/854
                  https://sungsoo.github.io/2018/03/19/design-patterns-in-python.html
@@ -67,58 +67,29 @@ class _DFManage:
 
 class Preprocess(_DFManage):
     __DEFAULT_ID = 'Symbol'
-    def __init__(self, df, id=None, using_features=[]):
+    def __init__(self, df, id=None):
         df = df.sort_values(['Symbol', 'Date'], ascending=[True, True]).reset_index(drop=True)
         self.df = df
-        self.id = id or Preprocess.__DEFAULT_ID
-        self.__using_features = using_features
-
+        self.__id = id or Preprocess.__DEFAULT_ID
+ 
     @property
-    def using_features(self):
-        return self.__using_features
+    def id(self):
+        return self.__id
+    
+    @id.setter
+    def id(self, id):
+        self.__id = id
 
-    @using_features.setter
-    def using_features(self, features):
-        self.__using_features = features
 
     def __naming(self, col, name, wide, other=False):
         if other in NAME_CHANGE_VAL : name = NAME[name]
         return col + name + str(wide)
 
-    def __getIdDF(self, id):
-        return self.df[self.df[self.id] == id][self.__using_features]
+    def __Transform_stockDF(self, using_feature):
+        return StocksData(self.df, self.__id, using_features)
 
-    def __Transform_StockDF(self):
-        """
-            Have to change
-            Lot's of problem in here
-        """
-        print(self.__using_features)
-        idx = self._getSymbols()
-         
-        _no_index_features = self.__using_features[:]
-        _no_index_features.remove('Date')
-
-        _index_feature = ['Date']
-
-        print(_no_index_features)
-        
-        _df = self.__getIdDF(idx[0])
-        _df = _df.rename(columns=dict(
-            zip(_no_index_features, [s + '_' + str(idx[0]) for s in _no_index_features] )
-        ))
-
-        for id in idx[1:]:
-            __df = self.__getIdDF(id)
-            __df = __df.rename(columns=dict(
-                zip(_no_index_features, [s + '_' + str(id) for s in _no_index_features])
-            ))
-            _df = pd.merge(_df, __df, on=_index_feature)
-
-        return _StockDataFrame(_df)
-
-    def save(self, filename, path='Data/', form=True):
-        data = self.__Transform_StockDF() if form else self.df
+    def save(self, filename, path, using_features=['Symbol', 'Date'], form=True):
+        data = self.__Transform_stockDF(using_features) if form else self.df[using_features]
         saveByPickle(data, filename, path)
 
     def technical_f(*outer_args,**outer_kwargs):
@@ -253,10 +224,10 @@ class Preprocess(_DFManage):
     def CommodityChannelINdex(self, window=20, min_periods=None, saved=True):
         name = 'CCI_' + str(window)
         def groupByRollingMean(df, column):
-            x = df.groupby(self.id)[column].rolling(window=window, min_periods=min_periods)
+            x = df.groupby(self.__id)[column].rolling(window=window, min_periods=min_periods)
             return x.mean().reset_index()[column]
         
-        temp = self._getInstanceDF([self.id] + ['High', 'Low', 'Close'])
+        temp = self._getInstanceDF([self.__id] + ['High', 'Low', 'Close'])
         temp['typical_price'] = (temp.High + temp.Low + temp.Close) / 3
         x = temp['typical_price'] - groupByRollingMean(temp, 'typical_price')
         temp['abs'] = abs(x)
@@ -269,9 +240,7 @@ class Preprocess(_DFManage):
         
 
 if __name__ == '__main__':
-    path_ = '../KOSPI200'
- 
-    df = loadDataFrame(filename='a', path=path_)
+    df = loadDataFrame(filename='a', path='../KOSPI200')
 
     p = Preprocess(df)
     p.MovingAverage(columns=['Close', 'High'], window=10)
@@ -281,8 +250,7 @@ if __name__ == '__main__':
     p.StochasticOscillator()
     p.CommodityChannelINdex()
     print(p.df.columns)
-
-    p.using_features = ['Date', 'High', 'Low', 'Open', 'Close', 'Volume',
+    using_features = ['Date', 'High', 'Low', 'Open', 'Close', 'Volume',
        'Adj Close', 'Symbol', 'Close_MA_10', 'High_MA_10', 'Close_DIFF.LOG_1',
        'Close_EWM_12', 'Close_MACD_12', 'Close_STOC.OSC_14', 'CCI_20']
-    p.save(filename='test', path='../Data/')
+    p.save(filename='test', path='../Data', using_features=using_features)
