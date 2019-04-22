@@ -5,11 +5,7 @@ import inspect
 import pickle, os
 
 from _util import StocksData
-"""
-design pattern   https://hamait.tistory.com/854
-                 https://sungsoo.github.io/2018/03/19/design-patterns-in-python.html
 
-"""
 FOLDER_PATH = '../KOSPI200'
 
 
