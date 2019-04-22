@@ -63,7 +63,6 @@ class _StockDataFrame():
 
 class StocksData():
     def __init__(self, df, id, using_features):
-        print(df.columns)
         df = df[using_features]
         self.__id = id
         self.__features = df.columns
