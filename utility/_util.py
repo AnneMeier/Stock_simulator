@@ -68,10 +68,15 @@ class _StockDataFrame():
 class StocksData():
     def __init__(self, df, id, using_features):
         df = df[using_features]
+        
         self.__id = id
+        self.__len = len(df.shape[0])
         self.__features = df.columns
+
         self.__symbols = np.sort(np.unique(df[id]))
         self.__data = {}
+
+        self.info = {'ID':self.__id, 'Features':self.__features, 'Length of Data':self.__len}
 
         import time
         start_time = time.time()
@@ -114,3 +119,10 @@ class StocksData():
 
     def __setstate__(self, state):
         self.__dict__ = state
+
+    def __repr__(self):
+        return "id: {0}\nfeatures: {1}\nLength of data : {2}\nSymbols : {3}"\
+                .format(self.__id, self.__features, self.__len, self.__symbols)
+
+    def __str__(self):
+        return self.info
