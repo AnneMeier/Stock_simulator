@@ -234,22 +234,4 @@ class Preprocess(_DFManage):
         if saved: self.mergeByColumn(temp[name])
 
         return temp[name]
-        
-
-if __name__ == '__main__':
-    df = loadByPickle(filename='a', path='../KOSPI200')
-
-    p = Preprocess(df)
-    p.MovingAverage(columns=['Close', 'High'], window=10)
-    p.LagReturn(columns=['Close'], type='log_lag')
-    p.WeightedAverage()
-    p.macd()
-    p.StochasticOscillator()
-    p.CommodityChannelINdex()
-    print(p.df.columns)
-    using_features = ['Date', 'High', 'Low', 'Open', 'Close', 'Volume',
-       'Adj Close', 'Symbol', 'Close_MA_10', 'High_MA_10', 'Close_DIFF.LOG_1',
-       'Close_EWM_12', 'Close_MACD_12', 'Close_STOC.OSC_14', 'CCI_20']
-    new_data = p.save(filename='test', path='../Data', using_features=using_features)
-    print(new_data.symbols)
-    print(new_data.features)
+ 
