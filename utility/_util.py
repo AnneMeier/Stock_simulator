@@ -70,7 +70,7 @@ class StocksData():
         df = df[using_features]
         
         self.__id = id
-        self.__len = len(df.shape[0])
+        self.__len = df.shape[0]
         self.__features = df.columns
 
         self.__symbols = np.sort(np.unique(df[id]))
