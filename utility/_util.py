@@ -2,6 +2,10 @@ import pandas as pd
 import numpy as np
 
 class _Array(np.ndarray):
+    """
+    ndarray extended to supply .name and other arbitrary properties
+    in ._opts dict.
+    """
     def __new__(cls, array, name=None, write=False, **kwargs):
         obj = np.asarray(array).view(cls)
         obj.name = name or array.name
@@ -76,6 +80,22 @@ class StocksData():
             self.__data[symbol] = _StockDataFrame(df[df[id] == symbol])
         print("============== {} seconds ==============".format(time.time() - start_time))
         print("Finished hashing stocks")
+
+    @property
+    def symbols(self):
+        return self.__symbols
+    
+    @symbols.setter
+    def symbols(self, symbols):
+        self.__symbols = symbols
+    
+    @property
+    def features(self):
+        return self.__features
+
+    @features.setter
+    def features(self, features):
+        self.__features = features
 
     def getitem(self, item):
         return getattr(self, item)
