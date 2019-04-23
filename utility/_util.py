@@ -71,12 +71,10 @@ class StocksData():
         
         self.__id = id
         self.__len = df.shape[0]
-        self.__features = df.columns
+        self.__features = df.columns if isinstance(df.columns, list) else list(df.columns)
 
         self.__symbols = np.sort(np.unique(df[id]))
         self.__data = {}
-
-        self.info = {'ID':self.__id, 'Features':self.__features, 'Length of Data':self.__len}
 
         import time
         start_time = time.time()
@@ -103,12 +101,15 @@ class StocksData():
         self.__features = features
 
     def getitem(self, item):
+        if isinstance(item, int) is False: item = str(item)
         return getattr(self, item)
 
     def __getitem__(self, item):
+        if isinstance(item, str) is False: item = str(item)
         return getattr(self, item)
 
     def __getattr__(self, item):
+        if isinstance(item, str): item = int(item)
         try:
             return self.__data[item]
         except KeyError:
@@ -121,8 +122,5 @@ class StocksData():
         self.__dict__ = state
 
     def __repr__(self):
-        return "id: {0}\nfeatures: {1}\nLength of data : {2}\nSymbols : {3}"\
-                .format(self.__id, self.__features, self.__len, self.__symbols)
-
-    def __str__(self):
-        return self.info
+        return "ID: {0}\nLength of data: {1}\nFeatures: {2}\nSymbols : {3}"\
+                .format(self.__id, self.__len, self.__features, self.__symbols)

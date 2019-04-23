@@ -13,14 +13,14 @@ def saveDataFrame(df, filename, path=None):
     path = path or FOLDER_PATH
     filename = os.path.join(path, filename + '.csv')
     df.to_csv(filename)
-    print(filename + '.csv saved!')
+    print(filename + ' saved!')
 
 def saveByPickle(data, filename, path=None):
     path = path or FOLDER_PATH
-    filename = os.path.join(path, filename + '.pickle')
+    filename = os.path.join(path, filename + '.pkl')
     with open(filename, 'wb') as f:
         pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
-    print(filename + '.pickle saved!')
+    print(filename + ' saved!')
 
 def loadDataFrame(filename, path=None):
     path = path or FOLDER_PATH
@@ -30,7 +30,7 @@ def loadDataFrame(filename, path=None):
 
 def loadByPickle(filename, path=None):
     path = path or FOLDER_PATH
-    filename = os.path.join(path, filename + '.pickle')
+    filename = os.path.join(path, filename + '.pkl')
     with open(filename, 'rb') as f:
         data = pickle.load(f)
     return data
@@ -87,6 +87,7 @@ class Preprocess(_DFManage):
     def save(self, filename, path, using_features=['Symbol', 'Date'], form=True):
         data = self.__Transform_stockDF(using_features) if form else self.df[using_features]
         saveByPickle(data, filename, path)
+        return data
 
     def technical_f(*outer_args,**outer_kwargs):
         """
@@ -236,7 +237,7 @@ class Preprocess(_DFManage):
         
 
 if __name__ == '__main__':
-    df = loadDataFrame(filename='a', path='../KOSPI200')
+    df = loadByPickle(filename='a', path='../KOSPI200')
 
     p = Preprocess(df)
     p.MovingAverage(columns=['Close', 'High'], window=10)
@@ -249,4 +250,6 @@ if __name__ == '__main__':
     using_features = ['Date', 'High', 'Low', 'Open', 'Close', 'Volume',
        'Adj Close', 'Symbol', 'Close_MA_10', 'High_MA_10', 'Close_DIFF.LOG_1',
        'Close_EWM_12', 'Close_MACD_12', 'Close_STOC.OSC_14', 'CCI_20']
-    p.save(filename='test', path='../Data', using_features=using_features)
+    new_data = p.save(filename='test', path='../Data', using_features=using_features)
+    print(new_data.symbols)
+    print(new_data.features)
