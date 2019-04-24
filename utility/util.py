@@ -99,10 +99,11 @@ class StocksData():
         df = df[using_features]
         
         self.__id = id
-        self.__len = df.shape[0]
         self.__features = df.columns if isinstance(df.columns, list) else list(df.columns)
 
         self.__symbols = np.sort(np.unique(df[id]))
+        self.__len = df[df[id] == self.__symbols[0]].shape[0]
+
         self.__data = {}
 
         import time
@@ -116,18 +117,14 @@ class StocksData():
     @property
     def symbols(self):
         return self.__symbols
-    
-    @symbols.setter
-    def symbols(self, symbols):
-        self.__symbols = symbols
-    
+        
     @property
     def features(self):
         return self.__features
 
-    @features.setter
-    def features(self, features):
-        self.__features = features
+    @property
+    def length(self):
+        return self.__len
 
     def getitem(self, item):
         return getattr(self, item)
