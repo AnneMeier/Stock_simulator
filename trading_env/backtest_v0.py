@@ -128,6 +128,7 @@ class Log:
         self.length = length
 
     def reset(self):
+        self.datetimes         = []
         self.returns_diff      = []
         self.returns_ratio     = []
         self.returns           = []
@@ -135,10 +136,10 @@ class Log:
         self.entrys            = []
         self.longs             = []
         self.cashes            = []
-
     def __repr__(self):
         log_out =   '=======================================================\n' +\
                     'Period              : {}\n'.format(len(self.returns)) +\
+                    'Date                : {}\n'.format(self.datetimes[-1]) +\
                     'Equity              : {}\n'.format(self.returns[-1]) +\
                     'Entry price         : {}\n'.format(np.sum(self.entry_cashs[-1])) +\
                     'Cash                : {}\n'.format(self.cashes[-1]) +\
@@ -198,6 +199,7 @@ class Trading_env():
         done = True if next_d == self._lenght - 1 else False
         
 
+        day            = False
         returns_diff   = []
         returns_ratio  = []
         entry_cashs    = []
@@ -239,6 +241,7 @@ class Trading_env():
             entrys.append(entry)
             longs.append(_long)
 
+            if day is False: day = broker.last_day
 
             broker.pos = next_pos
             broker._order.cancel()
@@ -246,6 +249,7 @@ class Trading_env():
         self._cash = self._cash - np.sum(entry_cashs)
         self._d = self._d + 1
 
+        self._log.datetimes.append(day)
         self._log.returns_diff.append(returns_diff)
         self._log.returns_ratio.append(returns_ratio)
         self._log.returns.append(self.equity)
